@@ -1,5 +1,6 @@
 import os
 import json
+import random
 from pprint import pprint
 from tkinter import *
 from collections import defaultdict
@@ -42,7 +43,7 @@ def add_room(name, x, y):
 
 def plot_rooms(rooms_in_map, available_rooms, unsatisfied_exits):
 	for room in rooms_in_map:
-		print("plotting {} at {} {}:".format(room['name'], room['x'], room['y']))
+		# print("plotting {} at {} {}:".format(room['name'], room['x'], room['y']))
 		available_room = available_rooms[room['name']]
 		x1 = room['x']
 		y1 = room['y']
@@ -78,7 +79,7 @@ def create_polygon_points(x, y, direction):
 	if direction in ("down", "right"):
 		points.append([(x + 1) * plot_scale, (y + 1) * plot_scale])
 	
-	print(points)
+	# print(points)
 	return points
 
 
@@ -87,9 +88,54 @@ def draw_grid(grid_size, spacing):
 		canvas.create_line(x * spacing, 0, x * spacing, grid_size * spacing, dash=(3,1))
 		canvas.create_line(0, x * spacing, grid_size * spacing, (x * spacing), dash=(3,1))
 
+def opposite_direction(direction):
+	if direction == "up":
+		return "down"
+	if direction == "down":
+		return "up"
+	if direction == "left":
+		return "right"
+	if direction == "right":
+		return "left"
+	return "INVALID"
+
+def direction_offset(direction):
+	if direction == "right":
+		return 1, 0
+	if direction == "left":
+		return -1, 0
+	if direction == "up":
+		return 0, -1
+	if direction == "down":
+		return 0, 1
+
+
+def add_room_to_random_exit():
+	unsatisfied_exit = random.choice(unsatisfied_exits)
+	print("Unsatisfied exit found at {} {} direction: {}"
+		.format(unsatisfied_exit['x'], unsatisfied_exit['y'], unsatisfied_exit['direction']))
+	# Find a room that has an exit that fits
+	for room in available_rooms.values():
+		for e in room['exits']:
+			ue_x = unsatisfied_exit['x']
+			ue_y = unsatisfied_exit['y']
+			ue_d = unsatisfied_exit['direction']
+			re_offset_x = e['x']
+			re_offset_y = e['y']
+			dir_offset_x, dir_offset_y = direction_offset(ue_d)
+			if e["direction"] == opposite_direction(ue_d):
+				print("Found exit to match the unsatisfied exit")
+				add_room(room['name'], 
+					ue_x + re_offset_x + dir_offset_x, 
+					ue_y + re_offset_y + dir_offset_y)
 
 add_room("mid1", 10, 10)
-add_room("mid1", 20, 20)
+add_room_to_random_exit()
+
+
+# Append random room to any available exits
+
+
 plot_rooms(rooms_in_map, available_rooms, unsatisfied_exits)
 draw_grid(grid_size, plot_scale)
 
