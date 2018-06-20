@@ -55,19 +55,19 @@ rooms_in_map = []
 unconnected_exits = []
 
 
-def add_room(name, x, y):
+def add_room(name, x, y, connected_exit = None):
 	if name in prefab_room_list.keys():
 		rooms_in_map.append([name, x, y, 0])
 		rx, ry, rtype, rexits = prefab_room_list[name]
 		for exit in rexits:
-			ex, ey, edir = exit
-			unconnected_exits.append([x + ex, y + ey, edir])
+			if exit != connected_exit:
+				ex, ey, edir = exit
+				unconnected_exits.append([x + ex, y + ey, edir])
 
 
 def plot_rooms(rooms_in_map, prefab_room_list, unconnected_exits):
 	for room in rooms_in_map:
 		name, x, y, rot = room
-		# print("plotting {} at {} {}:".format(room['name'], room['x'], room['y']))
 		prefab_width, prefab_height, prefab_type, prefab_exits = prefab_room_list[name]
 		x2 = x + prefab_width
 		y2 = y + prefab_height
@@ -150,7 +150,7 @@ def add_room_to_random_exit():
 				print("Found exit to match the unconnected exit")
 				new_room_x = uce_x + e_x + dir_offset_x
 				new_room_y = uce_y + e_y + dir_offset_y
-				add_room(prefab_name, new_room_x, new_room_y)
+				add_room(prefab_name, new_room_x, new_room_y, prefab_exit)
 				# Remove unconnected exit and the corresponding from the newly added room
 				unconnected_exits.remove(unconnected_exit)
 				# unconnected_exits.remove(e)
