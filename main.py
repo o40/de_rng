@@ -180,10 +180,10 @@ def add_room_to_random_exit():
 
                 if (uce_dir == Directions.RIGHT):
                     new_room_x = uce_x + 1
-                    new_room_y = uce_y
+                    new_room_y = uce_y - e_y
                 if (uce_dir == Directions.LEFT):
                     new_room_x = uce_x - prefab_width
-                    new_room_y = uce_y - prefab_height + e_y
+                    new_room_y = uce_y + e_y
                 add_room(prefab_name, new_room_x, new_room_y)
                 return True
     return False
@@ -191,7 +191,7 @@ def add_room_to_random_exit():
 
 add_room("mid1", 10, 10)
 room_added = True
-while (room_added and len(rooms_in_map) < 2):
+while (room_added and len(rooms_in_map) < 5):
     room_added = add_room_to_random_exit()
     remove_connected_exits_from_unconnected_list()
 
