@@ -47,7 +47,7 @@ def get_rooms():
             exits = []
             for exit in j['exits']:
                 exits.append([exit['x'],
-                              exit['y'],
+                              j['height'] - exit['y'] - 1,
                               string_to_direction(exit['direction'])])
             rooms[j['name']] = (j['width'], j['height'], j['type'], exits)
     return rooms
@@ -167,15 +167,23 @@ def add_room_to_random_exit():
           .format(uce_x, uce_y, uce_dir))
     # Find a room that has an exit that fits
     for prefab_name, prefab_room in prefab_room_list.items():
-        prefab_type, prefab_width, prefab_height, prefab_exits = prefab_room
+        prefab_width, prefab_height, prefab_type, prefab_exits = prefab_room
         for prefab_exit in prefab_exits:
             print(prefab_exit)
             e_x, e_y, e_dir = prefab_exit
             dir_offset_x, dir_offset_y = direction_offset(uce_dir)
             if e_dir == opposite_direction(uce_dir):
                 print("Found exit to match the unconnected exit")
-                new_room_x = uce_x + e_x + dir_offset_x
-                new_room_y = uce_y + e_y + dir_offset_y
+                print("prefab_exit:", prefab_exit)
+                print("unconnected_exit:", unconnected_exit)
+                print(prefab_height)
+
+                if (uce_dir == Directions.RIGHT):
+                    new_room_x = uce_x + 1
+                    new_room_y = uce_y
+                if (uce_dir == Directions.LEFT):
+                    new_room_x = uce_x - prefab_width
+                    new_room_y = uce_y - prefab_height + e_y
                 add_room(prefab_name, new_room_x, new_room_y)
                 return True
     return False
