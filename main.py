@@ -55,14 +55,13 @@ rooms_in_map = []
 unconnected_exits = []
 
 
-def add_room(name, x, y, connected_exit = None):
+def add_room(name, x, y):
 	if name in prefab_room_list.keys():
 		rooms_in_map.append([name, x, y, 0])
 		rx, ry, rtype, rexits = prefab_room_list[name]
 		for exit in rexits:
-			if exit != connected_exit:
-				ex, ey, edir = exit
-				unconnected_exits.append([x + ex, y + ey, edir])
+			ex, ey, edir = exit
+			unconnected_exits.append([x + ex, y + ey, edir])
 
 
 def plot_rooms(rooms_in_map, prefab_room_list, unconnected_exits):
@@ -133,6 +132,19 @@ def direction_offset(direction):
 		return 0, 1
 
 
+def remove_connected_exits_from_unconnected_list():
+	connected_exits = []
+	for exit1 in unconnected_exits:
+		for exit2 in unconnected_exits:
+			exit1_x, exit1_y, exit1_dir = exit1
+			exit2_x, exit2_y, exit2_dir = exit2
+			if exit1_dir == opposite_direction(exit2_dir):
+				dir_offset_x, dir_offset_y = direction_offset(exit1_dir)
+				if (exit1_x + dir_offset_x == exit2_x) and (exit1_y + dir_offset_y == exit2_y):
+					connected_exits.append(exit1)
+	for exit in connected_exits:
+		unconnected_exits.remove(exit)
+
 def add_room_to_random_exit():
 	unconnected_exit = random.choice(unconnected_exits)
 	uce_x, uce_y, uce_dir = unconnected_exit 
@@ -140,7 +152,6 @@ def add_room_to_random_exit():
 		.format(uce_x, uce_y, uce_dir))
 	# Find a room that has an exit that fits
 	for prefab_name, prefab_room in prefab_room_list.items():
-
 		prefab_type, prefab_width, prefab_height, prefab_exits = prefab_room
 		for prefab_exit in prefab_exits:
 			print(prefab_exit)
@@ -150,16 +161,12 @@ def add_room_to_random_exit():
 				print("Found exit to match the unconnected exit")
 				new_room_x = uce_x + e_x + dir_offset_x
 				new_room_y = uce_y + e_y + dir_offset_y
-				add_room(prefab_name, new_room_x, new_room_y, prefab_exit)
-				# Remove unconnected exit and the corresponding from the newly added room
-				unconnected_exits.remove(unconnected_exit)
-				# unconnected_exits.remove(e)
-				print(unconnected_exit)
-				print(prefab_exit)
-				print(unconnected_exits)
+				add_room(prefab_name, new_room_x, new_room_y)
+
 
 add_room("mid1", 10, 10)
 add_room_to_random_exit()
+remove_connected_exits_from_unconnected_list()
 
 
 # Append random room to any available exits
