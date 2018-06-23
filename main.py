@@ -50,17 +50,22 @@ class RoomExit():
 
 
 class PrefabRoom:
-    exits = []
-
     def __init__(self, prefab_json):
         self.name = prefab_json['name']
         self.width = prefab_json['width']
         self.height = prefab_json['height']
         self.type = prefab_json['type']
+        self.exits = []
         for exit in prefab_json['exits']:
-            self.exits.append(RoomExit(exit['x'],
-                              self.height - exit['y'] - 1,
-                              string_to_direction(exit['direction'])))
+            x = exit['x']
+            y = exit['y']
+            direction_str = exit['direction']
+            direction = string_to_direction(direction_str)
+            print("Adding exit for {} @ {},{} {}".format(
+                  self.name, x, y, direction))
+            self.exits.append(RoomExit(x,
+                                       self.height - exit['y'] - 1,
+                                       direction))
 
 
 class Room:
@@ -82,8 +87,7 @@ def get_rooms():
 
 prefab_room_list = get_rooms()
 
-# rooms_in_map struct
-# x, y, name, rotation (0, 90, 180, 270)
+# Array of rooms
 rooms_in_map = []
 
 # unconnected exits contains an array of RoomExit
@@ -91,10 +95,13 @@ unconnected_exits = []
 
 
 def add_room(name, x, y):
+    print("Adding room {} @ {} {}".format(name, x, y))
     if name in prefab_room_list.keys():
         rooms_in_map.append(Room(name, x, y, 0))
         prefab_room = prefab_room_list[name]
+        print("Exits len:", len(prefab_room.exits))
         for exit in prefab_room.exits:
+            print("Adding unconnected exit @{},{}".format(exit.x, exit.y))
             unconnected_exits.append(RoomExit(x + exit.x,
                                               y + exit.y,
                                               exit.direction))
@@ -145,8 +152,10 @@ def create_polygon_points(x, y, direction):
 
 def draw_grid(grid_size, spacing):
     for x in range(0, grid_size, spacing):
-        canvas.create_line(x * spacing, 0, x * spacing, grid_size * spacing, dash=(3,1))
-        canvas.create_line(0, x * spacing, grid_size * spacing, (x * spacing), dash=(3,1))
+        canvas.create_line(x * spacing, 0, x * spacing, grid_size * spacing,
+                           dash=(3, 1))
+        canvas.create_line(0, x * spacing, grid_size * spacing, (x * spacing),
+                           dash=(3, 1))
 
 
 def opposite_direction(direction):
@@ -177,6 +186,7 @@ def remove_connected_exits_from_unconnected_list():
     Remove exits that is connected to other exits.
     TODO: Figure out why there are duplicates.
     """
+    print("There are {} unconnected exits".format(len(unconnected_exits)))
     connected_exits = []
     for exit1 in unconnected_exits:
         for exit2 in unconnected_exits:
@@ -197,16 +207,18 @@ def add_room_to_random_exit():
           .format(uc_exit.x, uc_exit.y, uc_exit.direction))
     # Find a room that has an exit that fits
     # TODO: Randomize this
-    for prefab_name, prefab_room in prefab_room_list.items():
+    tries = 0
+    while tries < 30:
+        random_room_name = random.choice(list(prefab_room_list.keys()))
+        prefab_room = prefab_room_list[random_room_name]
+        print("Trying to add:", random_room_name)
         for prefab_exit in prefab_room.exits:
-            print(prefab_exit)
             dir_offset_x, dir_offset_y = direction_offset(uc_exit.direction)
             if prefab_exit.direction == opposite_direction(uc_exit.direction):
-                print("Found exit to match the unconnected exit")
-                print("prefab_exit:", prefab_exit)
-                print("unconnected_exit:", uc_exit)
-                print(prefab_room.height)
-
+                print("I am here")
+                if (uc_exit.direction in (Directions.UP, Directions.DOWN)):
+                    print("Unhandled direction")
+                    continue
                 if (uc_exit.direction == Directions.RIGHT):
                     new_room_x = uc_exit.x + 1
                     new_room_y = uc_exit.y - prefab_exit.y
@@ -217,8 +229,11 @@ def add_room_to_random_exit():
                 if not new_room_overlap_or_oob(prefab_room.name,
                                                new_room_x,
                                                new_room_y):
-                    add_room(prefab_name, new_room_x, new_room_y)
+                    add_room(prefab_room.name, new_room_x, new_room_y)
                     return True
+        tries += 1
+
+    print("Could not find a room that matches exit")
     return False
 
 
@@ -228,13 +243,9 @@ def new_room_overlap_or_oob(name, x, y):
 
 add_room("mid1", 10, 10)
 room_added = True
-while (room_added and len(rooms_in_map) < 5):
+while (room_added and len(rooms_in_map) < 2):
     room_added = add_room_to_random_exit()
     remove_connected_exits_from_unconnected_list()
-
-
-# Append random room to any available exits
-
 
 plot_rooms(rooms_in_map, prefab_room_list, unconnected_exits)
 draw_grid(grid_size, plot_scale)
