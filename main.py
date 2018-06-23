@@ -85,6 +85,10 @@ def get_rooms():
     return rooms
 
 
+# Debugging purposes
+random.seed(2)
+max_rooms = 5
+
 prefab_room_list = get_rooms()
 
 # Array of rooms
@@ -215,7 +219,6 @@ def add_room_to_random_exit():
         for prefab_exit in prefab_room.exits:
             dir_offset_x, dir_offset_y = direction_offset(uc_exit.direction)
             if prefab_exit.direction == opposite_direction(uc_exit.direction):
-                print("I am here")
                 if (uc_exit.direction in (Directions.UP, Directions.DOWN)):
                     print("Unhandled direction")
                     continue
@@ -224,7 +227,7 @@ def add_room_to_random_exit():
                     new_room_y = uc_exit.y - prefab_exit.y
                 if (uc_exit.direction == Directions.LEFT):
                     new_room_x = uc_exit.x - prefab_room.width
-                    new_room_y = uc_exit.y + prefab_exit.y
+                    new_room_y = uc_exit.y - prefab_exit.y
                 # TODO: Check if room fits in map area (no overlap or OOB)
                 if not new_room_overlap_or_oob(prefab_room.name,
                                                new_room_x,
@@ -243,7 +246,7 @@ def new_room_overlap_or_oob(name, x, y):
 
 add_room("mid1", 10, 10)
 room_added = True
-while (room_added and len(rooms_in_map) < 2):
+while (room_added and len(rooms_in_map) < max_rooms):
     room_added = add_room_to_random_exit()
     remove_connected_exits_from_unconnected_list()
 
