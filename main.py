@@ -6,25 +6,6 @@ from tkinter import *
 from collections import defaultdict
 from enum import Enum
 
-
-class Directions(Enum):
-    RIGHT = 0
-    UP = 1
-    LEFT = 2
-    DOWN = 3
-
-
-def string_to_direction(string):
-    if string == "left":
-        return Directions.LEFT
-    if string == "right":
-        return Directions.RIGHT
-    if string == "down":
-        return Directions.DOWN
-    if string == "up":
-        return Directions.UP
-
-
 # Plot settings
 plot_scale = 10
 
@@ -32,11 +13,24 @@ plot_scale = 10
 grid_size = 40
 grid = [[0 for x in range(grid_size)] for y in range(grid_size)]
 
+
+# Debugging purposes
+random.seed(2)
+max_rooms = 5
+
+
 # Tkinter canvas
 master = Tk()
 canvas = Canvas(master,
                 width=plot_scale * grid_size,
                 height=plot_scale * grid_size)
+
+
+class Directions(Enum):
+    RIGHT = 0
+    UP = 1
+    LEFT = 2
+    DOWN = 3
 
 
 class RoomExit():
@@ -69,11 +63,17 @@ class PrefabRoom:
 
 
 class Room:
-    def __init__(self, name, x, y, rotation):
+    def __init__(self, name, x, y, rotation, exits):
         self.name = name
         self.x = x
         self.y = y
         self.rotation = rotation
+        self.exits = []
+        # Add offset and rotation
+        for exit in exits:
+            self.exits.append(RoomExit(x + exit.x,
+                                       y + exit.y,
+                                       exit.direction))
 
 
 def get_rooms():
@@ -85,30 +85,28 @@ def get_rooms():
     return rooms
 
 
-# Debugging purposes
-random.seed(2)
-max_rooms = 5
-
-prefab_room_list = get_rooms()
-
-# Array of rooms
-rooms_in_map = []
-
-# unconnected exits contains an array of RoomExit
-unconnected_exits = []
+def string_to_direction(string):
+    if string == "left":
+        return Directions.LEFT
+    if string == "right":
+        return Directions.RIGHT
+    if string == "down":
+        return Directions.DOWN
+    if string == "up":
+        return Directions.UP
 
 
-def add_room(name, x, y):
+def add_room(room_list, prefab_room_list, name, x, y):
     print("Adding room {} @ {} {}".format(name, x, y))
     if name in prefab_room_list.keys():
-        rooms_in_map.append(Room(name, x, y, 0))
+        room_list.append(Room(name, x, y, 0, prefab_room_list[name].exits))
         prefab_room = prefab_room_list[name]
         print("Exits len:", len(prefab_room.exits))
-        for exit in prefab_room.exits:
-            print("Adding unconnected exit @{},{}".format(exit.x, exit.y))
-            unconnected_exits.append(RoomExit(x + exit.x,
-                                              y + exit.y,
-                                              exit.direction))
+        # for exit in prefab_room.exits:
+#            # print("Adding unconnected exit @{},{}".format(exit.x, exit.y))
+#            # unconnected_exits.append(RoomExit(x + exit.x,
+#            #                                  y + exit.y,
+#            #                                  exit.direction))
 
 
 def plot_rooms(rooms_in_map, prefab_room_list, unconnected_exits):
@@ -244,14 +242,47 @@ def new_room_overlap_or_oob(name, x, y):
     return False
 
 
-add_room("mid1", 10, 10)
-room_added = True
-while (room_added and len(rooms_in_map) < max_rooms):
-    room_added = add_room_to_random_exit()
-    remove_connected_exits_from_unconnected_list()
+def get_unconnected_exits(rooms):
+    unconnected_exits = []
+    for room in rooms:
+        for exit in room.exits:
+            if not get_matching_exit(exit, rooms):
+                unconnected_exits.append(exit)
+    return unconnected_exits
 
-plot_rooms(rooms_in_map, prefab_room_list, unconnected_exits)
-draw_grid(grid_size, plot_scale)
 
-canvas.pack()
-mainloop()
+def get_matching_exit(exit_to_match, rooms):
+    for room in rooms:
+        for exit in room.exits:
+            if (exit_to_match.direction == opposite_direction(exit.direction)):
+                dir_offset_x, dir_offset_y = direction_offset(exit_to_match.direction)
+                if ((exit_to_match.x + dir_offset_x) == exit.x and
+                        (exit_to_match.y + dir_offset_y) == exit.y):
+                            return True
+    return False
+
+
+def main():
+    prefab_room_list = get_rooms()
+
+    # Array of rooms
+    rooms_in_map = []
+
+    add_room(rooms_in_map, prefab_room_list, "mid1", 10, 10)
+    uc_exits = get_unconnected_exits(rooms_in_map)
+
+
+    # room_added = True
+    #while (room_added and len(rooms_in_map) < max_rooms):
+    #    room_added = add_room_to_random_exit()
+    #    remove_connected_exits_from_unconnected_list()
+
+    plot_rooms(rooms_in_map, prefab_room_list, uc_exits)
+    draw_grid(grid_size, plot_scale)
+
+    canvas.pack()
+    mainloop()
+
+
+if __name__ == "__main__":
+    main()
