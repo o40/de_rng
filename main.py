@@ -100,16 +100,9 @@ def add_room(room_list, prefab_room_list, name, x, y):
     print("Adding room {} @ {} {}".format(name, x, y))
     if name in prefab_room_list.keys():
         room_list.append(Room(name, x, y, 0, prefab_room_list[name].exits))
-        prefab_room = prefab_room_list[name]
-        print("Exits len:", len(prefab_room.exits))
-        # for exit in prefab_room.exits:
-#            # print("Adding unconnected exit @{},{}".format(exit.x, exit.y))
-#            # unconnected_exits.append(RoomExit(x + exit.x,
-#            #                                  y + exit.y,
-#            #                                  exit.direction))
 
 
-def plot_rooms(rooms_in_map, prefab_room_list, unconnected_exits):
+def plot_rooms(rooms_in_map, prefab_room_list):
     for room in rooms_in_map:
         prefab_room = prefab_room_list[room.name]
         x2 = room.x + prefab_room.width
@@ -127,7 +120,9 @@ def plot_rooms(rooms_in_map, prefab_room_list, unconnected_exits):
                                                         absolute_ey,
                                                         exit.direction),
                                   fill="green")
+
     # Plot unconnected exits
+    unconnected_exits = get_unconnected_exits(rooms_in_map)
     for exit in unconnected_exits:
         canvas.create_polygon(create_polygon_points(exit.x,
                                                     exit.y,
@@ -183,26 +178,8 @@ def direction_offset(direction):
         return 0, 1
 
 
-def remove_connected_exits_from_unconnected_list():
-    """
-    Remove exits that is connected to other exits.
-    TODO: Figure out why there are duplicates.
-    """
-    print("There are {} unconnected exits".format(len(unconnected_exits)))
-    connected_exits = []
-    for exit1 in unconnected_exits:
-        for exit2 in unconnected_exits:
-            if exit1.direction == opposite_direction(exit2.direction):
-                dir_offset_x, dir_offset_y = direction_offset(exit1.direction)
-                if ((exit1.x + dir_offset_x) == exit2.x and
-                        (exit1.y + dir_offset_y) == exit2.y):
-                    connected_exits.append(exit1)
-    for exit in connected_exits:
-        if exit in unconnected_exits:
-            unconnected_exits.remove(exit)
-
-
-def add_room_to_random_exit():
+def add_room_to_random_exit(rooms_in_map, prefab_room_list):
+    unconnected_exits = get_unconnected_exits(rooms_in_map)
     uc_exit = random.choice(unconnected_exits)
 
     print("unconnected exit found at {} {} direction: {}"
@@ -230,7 +207,11 @@ def add_room_to_random_exit():
                 if not new_room_overlap_or_oob(prefab_room.name,
                                                new_room_x,
                                                new_room_y):
-                    add_room(prefab_room.name, new_room_x, new_room_y)
+                    add_room(rooms_in_map,
+                             prefab_room_list,
+                             prefab_room.name,
+                             new_room_x,
+                             new_room_y)
                     return True
         tries += 1
 
@@ -269,15 +250,13 @@ def main():
     rooms_in_map = []
 
     add_room(rooms_in_map, prefab_room_list, "mid1", 10, 10)
+
+    room_added = True
+    while (room_added and len(rooms_in_map) < max_rooms):
+        room_added = add_room_to_random_exit(rooms_in_map, prefab_room_list)
+
     uc_exits = get_unconnected_exits(rooms_in_map)
-
-
-    # room_added = True
-    #while (room_added and len(rooms_in_map) < max_rooms):
-    #    room_added = add_room_to_random_exit()
-    #    remove_connected_exits_from_unconnected_list()
-
-    plot_rooms(rooms_in_map, prefab_room_list, uc_exits)
+    plot_rooms(rooms_in_map, prefab_room_list)
     draw_grid(grid_size, plot_scale)
 
     canvas.pack()
