@@ -5,19 +5,17 @@ from pprint import pprint
 from tkinter import *
 from collections import defaultdict
 from enum import Enum
+from rect import *
 
 # Plot settings
 plot_scale = 10
 
 # Grid for occupied areas in the map
 grid_size = 40
-grid = [[0 for x in range(grid_size)] for y in range(grid_size)]
-
 
 # Debugging purposes
-random.seed(2)
-max_rooms = 5
-
+# random.seed(2)
+max_rooms = 10
 
 # Tkinter canvas
 master = Tk()
@@ -55,8 +53,6 @@ class PrefabRoom:
             y = exit['y']
             direction_str = exit['direction']
             direction = string_to_direction(direction_str)
-            print("Adding exit for {} @ {},{} {}".format(
-                  self.name, x, y, direction))
             self.exits.append(RoomExit(x,
                                        self.height - exit['y'] - 1,
                                        direction))
@@ -104,6 +100,7 @@ def add_room(room_list, prefab_room_list, name, x, y):
 
 def plot_rooms(rooms_in_map, prefab_room_list):
     for room in rooms_in_map:
+        print("Plotting:", room.name, room.x, room.y)
         prefab_room = prefab_room_list[room.name]
         x2 = room.x + prefab_room.width
         y2 = room.y + prefab_room.height
@@ -182,8 +179,8 @@ def add_room_to_random_exit(rooms_in_map, prefab_room_list):
     unconnected_exits = get_unconnected_exits(rooms_in_map)
     uc_exit = random.choice(unconnected_exits)
 
-    print("unconnected exit found at {} {} direction: {}"
-          .format(uc_exit.x, uc_exit.y, uc_exit.direction))
+    # print("unconnected exit found at {} {} direction: {}"
+    #      .format(uc_exit.x, uc_exit.y, uc_exit.direction))
     # Find a room that has an exit that fits
     # TODO: Randomize this
     tries = 0
@@ -194,9 +191,12 @@ def add_room_to_random_exit(rooms_in_map, prefab_room_list):
         for prefab_exit in prefab_room.exits:
             dir_offset_x, dir_offset_y = direction_offset(uc_exit.direction)
             if prefab_exit.direction == opposite_direction(uc_exit.direction):
-                if (uc_exit.direction in (Directions.UP, Directions.DOWN)):
-                    print("Unhandled direction")
-                    continue
+                if (uc_exit.direction == Directions.DOWN):
+                    new_room_x = uc_exit.x - prefab_exit.x
+                    new_room_y = uc_exit.y + 1
+                if (uc_exit.direction == Directions.DOWN):
+                    new_room_x = uc_exit.x - prefab_exit.x
+                    new_room_y = uc_exit.y - prefab_exit.height
                 if (uc_exit.direction == Directions.RIGHT):
                     new_room_x = uc_exit.x + 1
                     new_room_y = uc_exit.y - prefab_exit.y
@@ -204,7 +204,9 @@ def add_room_to_random_exit(rooms_in_map, prefab_room_list):
                     new_room_x = uc_exit.x - prefab_room.width
                     new_room_y = uc_exit.y - prefab_exit.y
                 # TODO: Check if room fits in map area (no overlap or OOB)
-                if not new_room_overlap_or_oob(prefab_room.name,
+                if not new_room_overlap_or_oob(rooms_in_map,
+                                               prefab_room.name,
+                                               prefab_room_list,
                                                new_room_x,
                                                new_room_y):
                     add_room(rooms_in_map,
@@ -215,11 +217,30 @@ def add_room_to_random_exit(rooms_in_map, prefab_room_list):
                     return True
         tries += 1
 
-    print("Could not find a room that matches exit")
+    print("Could not find a room that matches exit:",
+          uc_exit.x, uc_exit.y, uc_exit.direction)
     return False
 
 
-def new_room_overlap_or_oob(name, x, y):
+def new_room_overlap_or_oob(rooms_in_map, name, prefab_room_list, x, y):
+    # Get rectangle for current room
+    new_rect = Rect(x,
+                    y,
+                    prefab_room_list[name].width,
+                    prefab_room_list[name].height)
+
+    if (new_rect.x < 0 or (new_rect.x2 >= grid_size) or
+            new_rect.y < 0 or (new_rect.y2 >= grid_size)):
+            return True
+
+    # Loop over the rectangles for all rooms in map
+    for room in rooms_in_map:
+        room_rect = Rect(room.x,
+                         room.y,
+                         prefab_room_list[name].width,
+                         prefab_room_list[name].height)
+        if new_rect.overlaps(room_rect):
+            return True
     return False
 
 
@@ -236,7 +257,9 @@ def get_matching_exit(exit_to_match, rooms):
     for room in rooms:
         for exit in room.exits:
             if (exit_to_match.direction == opposite_direction(exit.direction)):
-                dir_offset_x, dir_offset_y = direction_offset(exit_to_match.direction)
+                dir_offset_x, dir_offset_y = (
+                    direction_offset(exit_to_match.direction)
+                )
                 if ((exit_to_match.x + dir_offset_x) == exit.x and
                         (exit_to_match.y + dir_offset_y) == exit.y):
                             return True
