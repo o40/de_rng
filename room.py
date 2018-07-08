@@ -1,11 +1,4 @@
-from enum import Enum
-
-
-class Directions(Enum):
-    RIGHT = 0
-    UP = 1
-    LEFT = 2
-    DOWN = 3
+from direction import *
 
 
 class Room:
@@ -47,14 +40,3 @@ class PrefabRoom:
             self.exits.append(RoomExit(x,
                                        self.height - exit['y'] - 1,
                                        direction))
-
-
-def string_to_direction(string):
-    if string == "left":
-        return Directions.LEFT
-    if string == "right":
-        return Directions.RIGHT
-    if string == "down":
-        return Directions.DOWN
-    if string == "up":
-        return Directions.UP

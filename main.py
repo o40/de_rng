@@ -7,6 +7,7 @@ from collections import defaultdict
 from rect import *
 from room import *
 from plot import *
+from direction import *
 
 # Plot settings
 plot_scale = 10
@@ -38,29 +39,6 @@ def add_room(room_list, prefab_room_list, name, x, y):
     print("Adding room {} @ {} {}".format(name, x, y))
     if name in prefab_room_list.keys():
         room_list.append(Room(name, x, y, 0, prefab_room_list[name].exits))
-
-
-def opposite_direction(direction):
-    if direction == Directions.UP:
-        return Directions.DOWN
-    if direction == Directions.DOWN:
-        return Directions.UP
-    if direction == Directions.LEFT:
-        return Directions.RIGHT
-    if direction == Directions.RIGHT:
-        return Directions.LEFT
-    return "INVALID"
-
-
-def direction_offset(direction):
-    if direction == Directions.RIGHT:
-        return 1, 0
-    if direction == Directions.LEFT:
-        return -1, 0
-    if direction == Directions.UP:
-        return 0, -1
-    if direction == Directions.DOWN:
-        return 0, 1
 
 
 def add_room_to_random_exit(rooms_in_map, prefab_room_list):
