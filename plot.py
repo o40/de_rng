@@ -1,29 +1,33 @@
 from room import *
 
-def plot_rooms(canvas, rooms_in_map, unconnected_exits, prefab_room_list, plot_scale):
+
+def plot_rooms(canvas, rooms_in_map, unconnected_exits, prefab_room_list, plot_scale, grid_size):
+    canvas_width = int(canvas.cget("width"))
+    canvas_height = int(canvas.cget("height"))
     for room in rooms_in_map:
-        print("Plotting:", room.name, room.x, room.y)
+        x = room.x
+        y = grid_size - room.y
         prefab_room = prefab_room_list[room.name]
-        x2 = room.x + prefab_room.width
-        y2 = room.y + prefab_room.height
+        x2 = x + prefab_room.width
+        y2 = y - prefab_room.height
         canvas.create_rectangle(
-            room.x * plot_scale,
-            room.y * plot_scale,
-            x2 * plot_scale,
+            x * plot_scale,
             y2 * plot_scale,
-            outline="blue", fill="lightgray")
+            x2 * plot_scale,
+            y * plot_scale,
+            outline="blue", fill="pink")
         for exit in prefab_room.exits:
-            absolute_ex = room.x + exit.x
-            absolute_ey = room.y + exit.y
-            canvas.create_polygon(create_polygon_points(absolute_ex,
-                                                        absolute_ey,
+            absolute_exit_x = x + exit.x
+            absolute_exit_y = y - exit.y
+            canvas.create_polygon(create_polygon_points(absolute_exit_x,
+                                                        absolute_exit_y,
                                                         exit.rotation,
                                                         plot_scale),
                                   fill="green")
 
     for exit in unconnected_exits:
         canvas.create_polygon(create_polygon_points(exit.x,
-                                                    exit.y,
+                                                    grid_size - exit.y,
                                                     exit.rotation,
                                                     plot_scale),
                               fill="red")
@@ -31,24 +35,25 @@ def plot_rooms(canvas, rooms_in_map, unconnected_exits, prefab_room_list, plot_s
 
 def create_polygon_points(x, y, rotation, plot_scale):
     points = []
-    half_cell_height = 0.5
-    cell_mid_x = x + half_cell_height
-    cell_mid_y = y + half_cell_height
-    points.append([(cell_mid_x) * plot_scale, (cell_mid_y) * plot_scale])
-    if rotation in (90, 180):
-        points.append([x * plot_scale, y * plot_scale])
-    if rotation in (180, 270):
-        points.append([x * plot_scale, (y + 1) * plot_scale])
-    if rotation in (0, 90):
+    cell_mid_x = x + 0.5
+    cell_mid_y = y - 0.5
+    points.append([cell_mid_x * plot_scale, cell_mid_y * plot_scale])
+    if rotation in (0, 270):
         points.append([(x + 1) * plot_scale, y * plot_scale])
-    if rotation in (270, 0):
-        points.append([(x + 1) * plot_scale, (y + 1) * plot_scale])
+    if rotation in (270, 180):
+        points.append([x * plot_scale, y * plot_scale])
+    if rotation in (180, 90):
+        points.append([x * plot_scale, (y - 1) * plot_scale])
+    if rotation in (90, 0):
+        points.append([(x + 1) * plot_scale, (y - 1) * plot_scale])
     return points
 
 
-def draw_grid(canvas, grid_size, spacing):
-    for x in range(0, grid_size, spacing):
-        canvas.create_line(x * spacing, 0, x * spacing, grid_size * spacing,
+def draw_grid(canvas, grid_size, plot_scale, spacing):
+    canvas_width = canvas.cget("width")
+    canvas_height = canvas.cget("height")
+    for line_offset in range(0, grid_size * plot_scale, plot_scale * spacing):
+        canvas.create_line(line_offset, 0, line_offset, canvas_height,
                            dash=(3, 1))
-        canvas.create_line(0, x * spacing, grid_size * spacing, (x * spacing),
+        canvas.create_line(0, line_offset, canvas_width, line_offset,
                            dash=(3, 1))
