@@ -9,6 +9,13 @@ from room import *
 from plot import *
 from direction import *
 
+"""
+
+TODO:
+* Randomize order in which exits in rooms are checked for match.
+
+"""
+
 # Plot settings
 plot_scale = 10
 
@@ -45,9 +52,6 @@ def add_room_to_random_exit(rooms_in_map, prefab_room_list):
     unconnected_exits = get_unconnected_exits(rooms_in_map)
     uc_exit = random.choice(unconnected_exits)
 
-    # print("unconnected exit found at {} {} direction: {}"
-    #      .format(uc_exit.x, uc_exit.y, uc_exit.direction))
-    # Find a room that has an exit that fits
     # TODO: Randomize this
     tries = 0
     while tries < 30:
@@ -55,18 +59,18 @@ def add_room_to_random_exit(rooms_in_map, prefab_room_list):
         prefab_room = prefab_room_list[random_room_name]
         print("Trying to add:", random_room_name)
         for prefab_exit in prefab_room.exits:
-            dir_offset_x, dir_offset_y = direction_offset(uc_exit.direction)
-            if prefab_exit.direction == opposite_direction(uc_exit.direction):
-                if (uc_exit.direction == Directions.DOWN):
+            dir_offset_x, dir_offset_y = rotation_offset(uc_exit.rotation)
+            if prefab_exit.rotation == opposite_rotation(uc_exit.rotation):
+                if (uc_exit.rotation == 90):
                     new_room_x = uc_exit.x - prefab_exit.x
                     new_room_y = uc_exit.y + 1
-                if (uc_exit.direction == Directions.DOWN):
+                if (uc_exit.rotation == 270):
                     new_room_x = uc_exit.x - prefab_exit.x
                     new_room_y = uc_exit.y - prefab_exit.height
-                if (uc_exit.direction == Directions.RIGHT):
+                if (uc_exit.rotation == 0):
                     new_room_x = uc_exit.x + 1
                     new_room_y = uc_exit.y - prefab_exit.y
-                if (uc_exit.direction == Directions.LEFT):
+                if (uc_exit.rotation == 180):
                     new_room_x = uc_exit.x - prefab_room.width
                     new_room_y = uc_exit.y - prefab_exit.y
                 # TODO: Check if room fits in map area (no overlap or OOB)
@@ -84,7 +88,7 @@ def add_room_to_random_exit(rooms_in_map, prefab_room_list):
         tries += 1
 
     print("Could not find a room that matches exit:",
-          uc_exit.x, uc_exit.y, uc_exit.direction)
+          uc_exit.x, uc_exit.y, uc_exit.rotation)
     return False
 
 
@@ -122,9 +126,9 @@ def get_unconnected_exits(rooms):
 def get_matching_exit(exit_to_match, rooms):
     for room in rooms:
         for exit in room.exits:
-            if (exit_to_match.direction == opposite_direction(exit.direction)):
+            if (exit_to_match.rotation == opposite_rotation(exit.rotation)):
                 dir_offset_x, dir_offset_y = (
-                    direction_offset(exit_to_match.direction)
+                    rotation_offset(exit_to_match.rotation)
                 )
                 if ((exit_to_match.x + dir_offset_x) == exit.x and
                         (exit_to_match.y + dir_offset_y) == exit.y):
@@ -140,9 +144,9 @@ def main():
 
     add_room(rooms_in_map, prefab_room_list, "mid1", 10, 10)
 
-    room_added = True
-    while (room_added and len(rooms_in_map) < max_rooms):
-        room_added = add_room_to_random_exit(rooms_in_map, prefab_room_list)
+    # room_added = True
+    # while (room_added and len(rooms_in_map) < max_rooms):
+    #    room_added = add_room_to_random_exit(rooms_in_map, prefab_room_list)
 
     uc_exits = get_unconnected_exits(rooms_in_map)
     plot_rooms(canvas, rooms_in_map, uc_exits, prefab_room_list, plot_scale)

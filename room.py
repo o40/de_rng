@@ -12,17 +12,23 @@ class Room:
         for exit in exits:
             self.exits.append(RoomExit(x + exit.x,
                                        y + exit.y,
-                                       exit.direction))
+                                       exit.rotation))
+
+    def rotate(degrees):
+        """
+        Rotate the room counter clockwise
+        """
+        self.rotation = (self.rotation + degrees * 90) % 360
 
 
 class RoomExit():
     """
     Relative to the prefab room or absolute position in map
     """
-    def __init__(self, x, y, direction):
+    def __init__(self, x, y, rotation):
         self.x = x
         self.y = y
-        self.direction = direction
+        self.rotation = rotation
 
 
 class PrefabRoom:
@@ -36,7 +42,7 @@ class PrefabRoom:
             x = exit['x']
             y = exit['y']
             direction_str = exit['direction']
-            direction = string_to_direction(direction_str)
+            rotation = string_to_rotation(direction_str)
             self.exits.append(RoomExit(x,
                                        self.height - exit['y'] - 1,
-                                       direction))
+                                       rotation))

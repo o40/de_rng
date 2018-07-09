@@ -1,42 +1,22 @@
-from enum import Enum
+import math
 
 
-class Directions(Enum):
-    RIGHT = 0
-    UP = 1
-    LEFT = 2
-    DOWN = 3
-
-
-def string_to_direction(string):
+def string_to_rotation(string):
     if string == "left":
-        return Directions.LEFT
-    if string == "right":
-        return Directions.RIGHT
-    if string == "down":
-        return Directions.DOWN
+        return 0
     if string == "up":
-        return Directions.UP
+        return 90
+    if string == "right":
+        return 180
+    if string == "down":
+        return 270
 
 
-def opposite_direction(direction):
-    if direction == Directions.UP:
-        return Directions.DOWN
-    if direction == Directions.DOWN:
-        return Directions.UP
-    if direction == Directions.LEFT:
-        return Directions.RIGHT
-    if direction == Directions.RIGHT:
-        return Directions.LEFT
-    return "INVALID"
+def opposite_rotation(rotation):
+    return (rotation + 180) % 360
 
 
-def direction_offset(direction):
-    if direction == Directions.RIGHT:
-        return 1, 0
-    if direction == Directions.LEFT:
-        return -1, 0
-    if direction == Directions.UP:
-        return 0, -1
-    if direction == Directions.DOWN:
-        return 0, 1
+def rotation_offset(rotation):
+    # TODO: Fix coordinate system so that y+ means up
+    return int(math.cos(rotation * math.pi / 180)), \
+           -(int(math.sin(rotation * math.pi / 180)))

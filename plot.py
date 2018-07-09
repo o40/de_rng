@@ -17,31 +17,31 @@ def plot_rooms(canvas, rooms_in_map, unconnected_exits, prefab_room_list, plot_s
             absolute_ey = room.y + exit.y
             canvas.create_polygon(create_polygon_points(absolute_ex,
                                                         absolute_ey,
-                                                        exit.direction,
+                                                        exit.rotation,
                                                         plot_scale),
                                   fill="green")
 
     for exit in unconnected_exits:
         canvas.create_polygon(create_polygon_points(exit.x,
                                                     exit.y,
-                                                    exit.direction,
+                                                    exit.rotation,
                                                     plot_scale),
                               fill="red")
 
 
-def create_polygon_points(x, y, direction, plot_scale):
+def create_polygon_points(x, y, rotation, plot_scale):
     points = []
     half_cell_height = 0.5
     cell_mid_x = x + half_cell_height
     cell_mid_y = y + half_cell_height
     points.append([(cell_mid_x) * plot_scale, (cell_mid_y) * plot_scale])
-    if direction in (Directions.UP, Directions.LEFT):
+    if rotation in (90, 180):
         points.append([x * plot_scale, y * plot_scale])
-    if direction in (Directions.DOWN, Directions.LEFT):
+    if rotation in (180, 270):
         points.append([x * plot_scale, (y + 1) * plot_scale])
-    if direction in (Directions.UP, Directions.RIGHT):
+    if rotation in (0, 90):
         points.append([(x + 1) * plot_scale, y * plot_scale])
-    if direction in (Directions.DOWN, Directions.RIGHT):
+    if rotation in (270, 0):
         points.append([(x + 1) * plot_scale, (y + 1) * plot_scale])
     return points
 
