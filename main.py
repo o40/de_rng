@@ -89,6 +89,7 @@ def get_random_unconnected_exit(world):
     Compose a list of exits that are not connected and return
     a random exit from the list
     """
+    # TODO: How to handle when list is empty?
     unconnected_exits = get_unconnected_exits(world)
     return random.choice(unconnected_exits)
 
@@ -129,7 +130,11 @@ def add_room_to_random_exit(world, prefab_room_list):
         tries += 1
 
         # get random exit to connect
-        uc_exit = get_random_unconnected_exit(world)
+        try:
+            uc_exit = get_random_unconnected_exit(world)
+        except IndexError:
+            print("There are no unconnected exits")
+            return False
 
         # Get random room from list (with random rotation)
         prefab_room = get_random_room(prefab_room_list)
@@ -146,7 +151,7 @@ def add_room_to_random_exit(world, prefab_room_list):
 
         prefab_room.move(x, y)
 
-        if not verify_room_placement(world, prefab_room):
+        if not verify_room_placement(world, prefab_room, uc_exit):
             add_room(world, prefab_room)
             return True
 
@@ -155,7 +160,7 @@ def add_room_to_random_exit(world, prefab_room_list):
     return False
 
 
-def verify_room_placement(world, room):
+def verify_room_placement(world, room, uc_exit):
     """
     Verify that the room can be placed in the world without breaking
     the rules:
@@ -184,6 +189,24 @@ def verify_room_placement(world, room):
             return True
 
     # TODO: Check that this rect does not block exit from other room
+
+    # Create exit to exclude when looping over list
+    offset_x, offset_y = rotation_offset(uc_exit.rotation)
+    excluded_exit = RoomExit(x=uc_exit.x + offset_x,
+                             y=uc_exit.y + offset_y,
+                             rotation=opposite_rotation(uc_exit.rotation))
+    exits_to_check = [exit for exit in room.exits if exit != excluded_exit]
+    for exit in exits_to_check:
+        for room in world:
+            # Check if the exit ends up "overlapping" another room
+            exit_offset_x, exit_offset_y = rotation_offset(uc_exit.rotation)
+            # Hackish way of doing this. Refactor!
+            r = Room(x=exit.x + exit_offset_x,
+                     y=exit.y + exit_offset_y,
+                     width=1, height=1,
+                     name="", type="", rotation=0, exits=[])
+            if r.overlaps(room):
+                return True
 
     return False
 
