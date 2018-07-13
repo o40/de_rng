@@ -24,13 +24,17 @@ def room_blocks_exit_from_room_in_world(room, world, origin_exit):
                              rotation=opposite_rotation(origin_exit.rotation))
     exits_to_check = [exit for exit in room.exits if exit != excluded_exit]
     for exit in exits_to_check:
+        # print("Checking:", exit.__dict__)
         for room in world:
+            # print("if overlaps", room.__dict__)
             # Check if the exit ends up "overlapping" another room
-            exit_offset_x, exit_offset_y = rotation_offset(origin_exit.rotation)
+            exit_offset_x, exit_offset_y = rotation_offset(exit.rotation)
             # Hackish way of doing this. Refactor!
             r = Room(x=exit.x + exit_offset_x,
                      y=exit.y + exit_offset_y,
                      width=1, height=1,
                      name="", type="", rotation=0, exits=[])
+            print("tmproom", r.__dict__)
             if r.overlaps(room):
                 return True
+    return False
