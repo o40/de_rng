@@ -5,6 +5,9 @@ class Rect:
         self.x2 = x + width
         self.y2 = y + height
 
+    def __str__(self):
+        return str(self.__dict__)
+
     def overlaps(self, rect):
         """
         Since this is used in a discrete system, 0-2 does not overlap with 2-3.
@@ -23,6 +26,10 @@ class Rect:
             return True
         return False
 
-    def is_in_grid(self, grid_size):
-        return (self.x >= 0 and (self.x2 < grid_size) and
-                self.y >= 0 and (self.y2 < grid_size))
+    def is_in_grid(self, grid_size, margin=0):
+        x = self.x - margin
+        y = self.y - margin
+        x2 = self.x2 + margin
+        y2 = self.y2 + margin
+        return (x >= 0 and (x2 < grid_size) and
+                y >= 0 and (y2 < grid_size))

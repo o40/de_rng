@@ -42,9 +42,12 @@ class Room:
         self_room_rect = Rect(self.x, self.y, self.width, self.height)
         return room_rect.overlaps(self_room_rect)
 
-    def is_in_grid(self, grid_size):
-        room_rect = Rect(self.x, self.y, self.width, self.height)
-        return room_rect.is_in_grid(grid_size)
+    def is_in_grid(self, grid_size, margin=0):
+        room_rect = Rect(x=self.x,
+                         y=self.y,
+                         width=self.width,
+                         height=self.height)
+        return room_rect.is_in_grid(grid_size, margin)
 
 
 class RoomExit():

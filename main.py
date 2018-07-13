@@ -111,7 +111,11 @@ def get_coordinates_for_matched_prefab_room(uc_exit, prefab_exit, prefab_room):
     Get the coordinates for the bottom left coordinates to place the room
     so that the given exit lines up with the exit from the room to add.
     """
+
+    # Get coordinate for exit in the new room
     dir_offset_x, dir_offset_y = rotation_offset(uc_exit.rotation)
+
+    # Get coordinate for the bottom left corner for the new room
     origo_offset_x, origo_offset_y = origo_offset_from_exit(uc_exit,
                                                             prefab_exit,
                                                             prefab_room)
@@ -178,6 +182,7 @@ def verify_room_placement(world, room, uc_exit):
         if world_room.overlaps(room):
             return True
 
+    # TODO: This also covers the first use case
     for exit in room.exits:
         margin = 3
         ro_x, ro_y = rotation_offset(exit.rotation)
