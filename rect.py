@@ -9,15 +9,15 @@ class Rect:
         """
         Since this is used in a discrete system, 0-2 does not overlap with 2-3.
         """
-        x_overlap = (self.x < rect.x < self.x2 or
-                     self.x < rect.x2 < self.x2 or
-                     rect.x < self.x < rect.x2 or
-                     rect.x < self.x2 < rect.x2)
+        x_overlap = (self.x <= rect.x < self.x2 or
+                     self.x < rect.x2 <= self.x2 or
+                     rect.x <= self.x < rect.x2 or
+                     rect.x < self.x2 <= rect.x2)
 
-        y_overlap = (self.y < rect.y < self.y2 or
-                     self.y < rect.y2 < self.y2 or
-                     rect.y < self.y < rect.y2 or
-                     rect.y < self.y2 < rect.y2)
+        y_overlap = (self.y <= rect.y < self.y2 or
+                     self.y < rect.y2 <= self.y2 or
+                     rect.y <= self.y < rect.y2 or
+                     rect.y < self.y2 <= rect.y2)
 
         if x_overlap and y_overlap:
             return True
