@@ -12,8 +12,11 @@ from rotation import *
 """
 
 TODO:
-* Randomize order in which exits in rooms are checked for match.
 * Ditch the 0.5 offset?
+* Add checker when adding room so that an exit does not end up in already existing room
+* Add checker when adding room so that no new exit is near world edge (2 squares?)
+* Add spawns, bombsites, mid and large rooms first before adding rest
+* Verify that all areas of map can be reached. Should be possible to traverse.
 """
 
 # Plot settings
@@ -23,8 +26,8 @@ plot_scale = 10
 grid_size = 40
 
 # Debugging purposes
-random.seed(4)
-max_rooms = 10
+# random.seed(4)
+max_rooms = 50
 
 # Tkinter canvas
 master = Tk()
@@ -35,6 +38,11 @@ master.update()
 
 
 def get_rooms():
+    """
+    Read the prefab room json files from the rooms folder and parse
+    them to Room objects which then is placed in a dictionary with the
+    room name as key.
+    """
     rooms = defaultdict(list)
     for file in os.listdir("rooms"):
         with open("rooms/" + file, 'r') as f:
@@ -43,11 +51,17 @@ def get_rooms():
     return rooms
 
 
-def add_room(room_list, room):
-    room_list.append(room)
+def add_room(world, room):
+    """
+    Add a room to the world list
+    """
+    world.append(room)
 
 
 def get_matching_exit(exit_to_match, exit_list):
+    """
+    Get exit from room that matches the rotation of the given exit
+    """
     shuffled_exits = exit_list[:]
     for exit in shuffled_exits:
         if exit.rotation != opposite_rotation(exit_to_match.rotation):
@@ -57,6 +71,9 @@ def get_matching_exit(exit_to_match, exit_list):
 
 
 def origo_offset_from_exit(uc_exit, prefab_exit, prefab_room):
+    """
+    Get the coordinates to where the exit ends up outside the room
+    """
     if (uc_exit.rotation == 90):
         return -prefab_exit.x, 1
     if (uc_exit.rotation == 270):
@@ -68,28 +85,45 @@ def origo_offset_from_exit(uc_exit, prefab_exit, prefab_room):
 
 
 def get_random_unconnected_exit(world):
+    """
+    Compose a list of exits that are not connected and return
+    a random exit from the list
+    """
     unconnected_exits = get_unconnected_exits(world)
     return random.choice(unconnected_exits)
 
 
-def get_random_prefab_room(prefab_room_list):
-    random_room_name = random.choice(list(prefab_room_list.keys()))
-    prefab_room = copy.deepcopy(prefab_room_list[random_room_name])
-    # Rotate the room randomly
+def get_random_room(room_list):
+    """
+    Get a copy of a random room in the room list. The room is
+    rotated randomly before returned.
+    """
+    random_room_name = random.choice(list(room_list.keys()))
+    room = copy.deepcopy(room_list[random_room_name])
     rotation = random.choice([0, 90, 180, 270])
-    prefab_room.rotate(rotation)
-    return prefab_room
+    room.rotate(rotation)
+    return room
 
 
 def get_coordinates_for_matched_prefab_room(uc_exit, prefab_exit, prefab_room):
+    """
+    Get the coordinates for the bottom left coordinates to place the room
+    so that the given exit lines up with the exit from the room to add.
+    """
     dir_offset_x, dir_offset_y = rotation_offset(uc_exit.rotation)
-    origo_offset_x, origo_offset_y = origo_offset_from_exit(uc_exit, prefab_exit, prefab_room)
+    origo_offset_x, origo_offset_y = origo_offset_from_exit(uc_exit,
+                                                            prefab_exit,
+                                                            prefab_room)
     new_x = uc_exit.x + origo_offset_x
     new_y = uc_exit.y + origo_offset_y
     return new_x, new_y
 
 
 def add_room_to_random_exit(world, prefab_room_list):
+    """
+    Find a random exit in the current world and try to attach
+    a room to it.
+    """
     tries = 0
     while tries < 300:
         tries += 1
@@ -98,7 +132,7 @@ def add_room_to_random_exit(world, prefab_room_list):
         uc_exit = get_random_unconnected_exit(world)
 
         # Get random room from list (with random rotation)
-        prefab_room = get_random_prefab_room(prefab_room_list)
+        prefab_room = get_random_room(prefab_room_list)
 
         # Get exit from room that matches the unconnected exit
         prefab_exit = get_matching_exit(uc_exit, prefab_room.exits)
@@ -106,12 +140,13 @@ def add_room_to_random_exit(world, prefab_room_list):
         if prefab_exit is None:
             continue
 
-        new_room_x, new_room_y = get_coordinates_for_matched_prefab_room(uc_exit, prefab_exit, prefab_room)
+        x, y = get_coordinates_for_matched_prefab_room(uc_exit,
+                                                       prefab_exit,
+                                                       prefab_room)
 
-        prefab_room.move(new_room_x, new_room_y)
+        prefab_room.move(x, y)
 
-        # TODO: Check if room fits in map area (no overlap or OOB, or blocks and exit)
-        if not new_room_overlap_or_oob(world, prefab_room, new_room_x, new_room_y):
+        if not verify_room_placement(world, prefab_room):
             add_room(world, prefab_room)
             return True
 
@@ -120,7 +155,15 @@ def add_room_to_random_exit(world, prefab_room_list):
     return False
 
 
-def new_room_overlap_or_oob(world, room, x, y):
+def verify_room_placement(world, room):
+    """
+    Verify that the room can be placed in the world without breaking
+    the rules:
+    * The room must be in the grid
+    * The room can not overlap another room
+    * The room can not block an exit from another room
+    * The room exit can not be too close to the world edge
+    """
     # Check if room is in grid
     if not room.is_in_grid(grid_size):
         return True
