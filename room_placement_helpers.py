@@ -3,6 +3,10 @@ from rotation import *
 
 
 def room_has_exit_near_grid_edge(room, grid_size, margin=3):
+    """
+    Check if the room has en exit that ends up closer than
+    "margin" units from the grid edge
+    """
     for exit in room.exits:
         ro_x, ro_y = rotation_offset(exit.rotation)
         x = exit.x + ro_x

@@ -134,6 +134,48 @@ class TestRoom(unittest.TestCase):
         self.assertEqual(room.exits[0].y, 1)
         self.assertEqual(room.exits[0].rotation, 180)
 
+    def test_room_move(self):
+        exits = []
+        exits.append(RoomExit(x=0, y=1, rotation=180))
+
+        # A 5x3 room at 0,0, with an exit at 0,1, facing left
+        room = Room(name="test", type="test",
+                    x=0, y=0,
+                    width=5, height=3,
+                    rotation=0,
+                    exits=exits)
+
+        self.assertEqual(room.x, 0)
+        self.assertEqual(room.y, 0)
+        self.assertEqual(room.rotation, 0)
+        self.assertEqual(room.width, 5)
+        self.assertEqual(room.height, 3)
+        self.assertEqual(room.exits[0].x, 0)
+        self.assertEqual(room.exits[0].y, 1)
+        self.assertEqual(room.exits[0].rotation, 180)
+
+        room.move(1, 1)
+
+        self.assertEqual(room.x, 1)
+        self.assertEqual(room.y, 1)
+        self.assertEqual(room.rotation, 0)
+        self.assertEqual(room.width, 5)
+        self.assertEqual(room.height, 3)
+        self.assertEqual(room.exits[0].x, 1)
+        self.assertEqual(room.exits[0].y, 2)
+        self.assertEqual(room.exits[0].rotation, 180)
+
+        room.move(2, 2)
+
+        self.assertEqual(room.x, 2)
+        self.assertEqual(room.y, 2)
+        self.assertEqual(room.rotation, 0)
+        self.assertEqual(room.width, 5)
+        self.assertEqual(room.height, 3)
+        self.assertEqual(room.exits[0].x, 2)
+        self.assertEqual(room.exits[0].y, 3)
+        self.assertEqual(room.exits[0].rotation, 180)
+
 
 if __name__ == '__main__':
     unittest.main(exit=False)

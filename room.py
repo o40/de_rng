@@ -32,10 +32,12 @@ class Room:
             self.width, self.height = self.height, self.width
 
     def move(self, x, y):
+        xdiff = x - self.x
+        ydiff = y - self.y
         self.x, self.y = x, y
         for exit in self.exits:
-            exit.x += x
-            exit.y += y
+            exit.x += xdiff
+            exit.y += ydiff
 
     def overlaps(self, room):
         room_rect = Rect(room.x, room.y, room.width, room.height)
