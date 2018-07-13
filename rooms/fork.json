@@ -1,0 +1,11 @@
+{
+    "name": "fork",
+    "type": "none",
+    "width": 3,
+    "height": 2,
+    "exits": [
+        {"x": 0, "y": 0, "direction": "left" },
+        {"x": 2, "y": 1, "direction": "right" },
+        {"x": 1, "y": 0, "direction": "down" }
+    ]
+}

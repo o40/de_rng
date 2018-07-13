@@ -25,4 +25,4 @@ class Rect:
 
     def is_in_grid(self, grid_size):
         return (self.x >= 0 and (self.x2 < grid_size) and
-                self.y >= 0 or (self.y2 < grid_size))
+                self.y >= 0 and (self.y2 < grid_size))

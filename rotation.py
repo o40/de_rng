@@ -17,5 +17,4 @@ def opposite_rotation(rotation):
 
 
 def rotation_offset(rotation):
-    return int(math.cos(rotation * math.pi / 180)), \
-           int(math.sin(rotation * math.pi / 180))
+    return int(math.cos(rotation * math.pi / 180)), int(math.sin(rotation * math.pi / 180))

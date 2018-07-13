@@ -1,6 +1,6 @@
 import unittest
 from room import *
-from direction import *
+from rotation import *
 
 
 class TestRoom(unittest.TestCase):

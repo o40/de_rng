@@ -1,9 +1,11 @@
-from direction import *
+from rotation import *
+from rect import *
 
 
 class Room:
-    def __init__(self, name, x, y, width, height, rotation, exits):
+    def __init__(self, name, x, y, width, height, rotation, exits, type):
         self.name = name
+        self.type = type
         self.x = x
         self.y = y
         self.width = width
@@ -29,6 +31,21 @@ class Room:
         if (rotation % 180) != 0:
             self.width, self.height = self.height, self.width
 
+    def move(self, x, y):
+        self.x, self.y = x, y
+        for exit in self.exits:
+            exit.x += x
+            exit.y += y
+
+    def overlaps(self, room):
+        room_rect = Rect(room.x, room.y, room.width, room.height)
+        self_room_rect = Rect(self.x, self.y, self.width, self.height)
+        return room_rect.overlaps(self_room_rect)
+
+    def is_in_grid(self, grid_size):
+        room_rect = Rect(self.x, self.y, self.width, self.height)
+        return room_rect.is_in_grid(grid_size)
+
 
 class RoomExit():
     """
@@ -40,19 +57,25 @@ class RoomExit():
         self.rotation = rotation
 
 
-class PrefabRoom:
-    def __init__(self, prefab_json):
-        self.name = prefab_json['name']
-        self.width = int(prefab_json['width'])
-        self.height = int(prefab_json['height'])
-        self.type = prefab_json['type']
-        self.exits = []
-        for exit in prefab_json['exits']:
+def create_room_from_json(room_json):
+    # name, x, y, width, height, rotation, exits
+
+    exits = []
+    for exit in room_json['exits']:
             x = exit['x']
             y = exit['y']
             direction_str = exit['direction']
             rotation = string_to_rotation(direction_str)
-            self.exits.append(RoomExit(x, y, rotation))
+            exits.append(RoomExit(x, y, rotation))
+
+    return Room(name=room_json['name'],
+                x=0,
+                y=0,
+                width=int(room_json['width']),
+                height=int(room_json['height']),
+                rotation=0,
+                exits=exits,
+                type=room_json['type'])
 
 
 def rotate_exit(exit, width, height, rotation):

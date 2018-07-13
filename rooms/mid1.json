@@ -3,7 +3,7 @@
 	"type": "mid",
 	"width": 2,
 	"height": 4,
-	"exits": [ 
+	"exits": [
 		{"x": 0, "y": 0, "direction": "left" },
 		{"x": 1, "y": 3, "direction": "right" }
 	]

@@ -1,26 +1,23 @@
 from room import *
 
 
-def plot_rooms(canvas, rooms_in_map, unconnected_exits, prefab_room_list, plot_scale, grid_size):
+def plot_rooms(canvas, world, unconnected_exits, plot_scale, grid_size):
     canvas_width = int(canvas.cget("width"))
     canvas_height = int(canvas.cget("height"))
-    for room in rooms_in_map:
+    for room in world:
         x = room.x
         y = grid_size - room.y
-        prefab_room = prefab_room_list[room.name]
-        x2 = x + prefab_room.width
-        y2 = y - prefab_room.height
+        x2 = x + room.width
+        y2 = y - room.height
         canvas.create_rectangle(
             x * plot_scale,
             y2 * plot_scale,
             x2 * plot_scale,
             y * plot_scale,
             outline="blue", fill="pink")
-        for exit in prefab_room.exits:
-            absolute_exit_x = x + exit.x
-            absolute_exit_y = y - exit.y
-            canvas.create_polygon(create_polygon_points(absolute_exit_x,
-                                                        absolute_exit_y,
+        for exit in room.exits:
+            canvas.create_polygon(create_polygon_points(exit.x,
+                                                        grid_size - exit.y,
                                                         exit.rotation,
                                                         plot_scale),
                                   fill="green")
