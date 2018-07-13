@@ -56,6 +56,11 @@ class RoomExit():
         self.y = y
         self.rotation = rotation
 
+    def __eq__(self, exit):
+        return (self.x == exit.x and
+                self.y == exit.y and
+                self.rotation == exit.rotation)
+
 
 def create_room_from_json(room_json):
     # name, x, y, width, height, rotation, exits
