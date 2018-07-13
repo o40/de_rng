@@ -70,8 +70,7 @@ class TestRoomPlacementHelpers(unittest.TestCase):
 
         # Create room that should be added
         self.assertTrue(room_blocks_exit_from_room_in_world(room_to_add,
-                                                            world,
-                                                            origin_exit))
+                                                            world))
 
 
 if __name__ == '__main__':

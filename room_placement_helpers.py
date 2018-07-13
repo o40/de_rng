@@ -1,5 +1,6 @@
 from room import *
 from rotation import *
+import copy
 
 
 def room_has_exit_near_grid_edge(room, grid_size, margin=3):
@@ -17,22 +18,22 @@ def room_has_exit_near_grid_edge(room, grid_size, margin=3):
     return False
 
 
-def room_blocks_exit_from_room_in_world(room, world, origin_exit):
-    excluded_exit = origin_exit.mirror()
+def room_blocks_exit_from_room_in_world(room, world):
+    world_copy = copy.deepcopy(world)
+    world_copy.append(room)
 
-    exits_to_check = [exit for exit in room.exits if exit != excluded_exit]
-    for exit in exits_to_check:
-        # print("Checking:", exit.__dict__)
+    unconnected_exits = get_unconnected_exits(world_copy)
+
+    for exit in unconnected_exits:
         for room in world:
-            # print("if overlaps", room.__dict__)
             # Check if the exit ends up "overlapping" another room
-            exit_offset_x, exit_offset_y = rotation_offset(exit.rotation)
+            mirror_exit = exit.mirror()
             # Hackish way of doing this. Refactor!
-            r = Room(x=exit.x + exit_offset_x,
-                     y=exit.y + exit_offset_y,
+            r = Room(x=mirror_exit.x,
+                     y=mirror_exit.y,
                      width=1, height=1,
                      name="", type="", rotation=0, exits=[])
-            print("tmproom", r.__dict__)
             if r.overlaps(room):
                 return True
+
     return False

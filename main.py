@@ -185,7 +185,7 @@ def verify_room_placement(world, room, uc_exit):
     if room_has_exit_near_grid_edge(room, grid_size, margin=3):
         return True
 
-    if room_blocks_exit_from_room_in_world(room, world, uc_exit):
+    if room_blocks_exit_from_room_in_world(room, world):
         return True
 
     return False
