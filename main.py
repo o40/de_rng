@@ -173,6 +173,16 @@ def verify_room_placement(world, room):
         if world_room.overlaps(room):
             return True
 
+    for exit in room.exits:
+        margin = 3
+        ro_x, ro_y = rotation_offset(exit.rotation)
+        x = exit.x + ro_x
+        y = exit.y + ro_y
+
+        if ((x - margin < 0) or (y - margin < 0) or
+           (x + margin >= grid_size) or (y + margin >= grid_size)):
+            return True
+
     # TODO: Check that this rect does not block exit from other room
 
     return False
