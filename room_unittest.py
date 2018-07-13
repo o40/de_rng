@@ -10,7 +10,11 @@ class TestRoom(unittest.TestCase):
         exits.append(RoomExit(x=0, y=0, rotation=270))
 
         # A 4x4 room at 0,0, with an exit at 0,0, facing down
-        room = Room(name="test", x=0, y=0, width=4, height=4, rotation=0, exits=exits)
+        room = Room(name="test", type="test",
+                    x=0, y=0,
+                    width=4, height=4,
+                    rotation=0,
+                    exits=exits)
 
         room.rotate(90)
         self.assertEqual(room.rotation, 90)
@@ -49,7 +53,11 @@ class TestRoom(unittest.TestCase):
         exits.append(RoomExit(x=0, y=0, rotation=270))
 
         # A 4x2 room at 0,0, with an exit at 0,0, facing down
-        room = Room(name="test", x=0, y=0, width=4, height=2, rotation=0, exits=exits)
+        room = Room(name="test", type="test",
+                    x=0, y=0,
+                    width=4, height=2,
+                    rotation=0,
+                    exits=exits)
 
         room.rotate(90)
         self.assertEqual(room.rotation, 90)
@@ -88,7 +96,11 @@ class TestRoom(unittest.TestCase):
         exits.append(RoomExit(x=0, y=1, rotation=180))
 
         # A 5x3 room at 0,0, with an exit at 0,1, facing left
-        room = Room(name="test", x=0, y=0, width=5, height=3, rotation=0, exits=exits)
+        room = Room(name="test", type="test",
+                    x=0, y=0,
+                    width=5, height=3,
+                    rotation=0,
+                    exits=exits)
 
         room.rotate(90)
         self.assertEqual(room.rotation, 90)
