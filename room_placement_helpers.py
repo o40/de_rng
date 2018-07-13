@@ -18,10 +18,8 @@ def room_has_exit_near_grid_edge(room, grid_size, margin=3):
 
 
 def room_blocks_exit_from_room_in_world(room, world, origin_exit):
-    offset_x, offset_y = rotation_offset(origin_exit.rotation)
-    excluded_exit = RoomExit(x=origin_exit.x + offset_x,
-                             y=origin_exit.y + offset_y,
-                             rotation=opposite_rotation(origin_exit.rotation))
+    excluded_exit = origin_exit.mirror()
+
     exits_to_check = [exit for exit in room.exits if exit != excluded_exit]
     for exit in exits_to_check:
         # print("Checking:", exit.__dict__)

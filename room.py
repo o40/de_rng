@@ -66,6 +66,15 @@ class RoomExit():
                 self.y == exit.y and
                 self.rotation == exit.rotation)
 
+    def mirror(self):
+        """
+        Return a mirrored exit that matches this exit
+        """
+        off_x, off_y = rotation_offset(self.rotation)
+        x = self.x + off_x
+        y = self.y + off_y
+        return RoomExit(x, y, opposite_rotation(self.rotation))
+
 
 def create_room_from_json(room_json):
     # name, x, y, width, height, rotation, exits
