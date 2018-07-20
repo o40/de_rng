@@ -18,22 +18,23 @@ def room_has_exit_near_grid_edge(room, grid_size, margin=3):
     return False
 
 
+def room_in_world_has_blocked_exit(world):
+    unconnected_exits = get_unconnected_exits(world)
+    for exit in unconnected_exits:
+        # Check if the exit ends up "overlapping" another room
+        mirror_exit = exit.mirror()
+        # Hackish way of doing this. Refactor!
+        r = Room(x=mirror_exit.x,
+                 y=mirror_exit.y,
+                 width=1, height=1,
+                 name="", type="", rotation=0, exits=[])
+        for room in world:
+            if r.overlaps(room):
+                return True
+    return False
+
+
 def room_blocks_exit_from_room_in_world(room, world):
     world_copy = copy.deepcopy(world)
     world_copy.append(room)
-
-    unconnected_exits = get_unconnected_exits(world_copy)
-
-    for exit in unconnected_exits:
-        for room in world:
-            # Check if the exit ends up "overlapping" another room
-            mirror_exit = exit.mirror()
-            # Hackish way of doing this. Refactor!
-            r = Room(x=mirror_exit.x,
-                     y=mirror_exit.y,
-                     width=1, height=1,
-                     name="", type="", rotation=0, exits=[])
-            if r.overlaps(room):
-                return True
-
-    return False
+    return room_in_world_has_blocked_exit(world_copy)

@@ -1,5 +1,11 @@
 from rotation import *
 from rect import *
+from json import JSONEncoder
+
+
+class RoomEncoder(JSONEncoder):
+    def default(self, o):
+        return o.__dict__
 
 
 class Room:
@@ -75,17 +81,20 @@ class RoomExit():
         y = self.y + off_y
         return RoomExit(x, y, opposite_rotation(self.rotation))
 
+    def deserialize(json):
+        x = json['x']
+        y = json['y']
+        direction_str = json['direction']
+        rotation = string_to_rotation(direction_str)
+        return RoomExit(x, y, rotation)
+
 
 def create_room_from_json(room_json):
     # name, x, y, width, height, rotation, exits
 
     exits = []
     for exit in room_json['exits']:
-            x = exit['x']
-            y = exit['y']
-            direction_str = exit['direction']
-            rotation = string_to_rotation(direction_str)
-            exits.append(RoomExit(x, y, rotation))
+            exits.append(RoomExit.deserialize(exit))
 
     return Room(name=room_json['name'],
                 x=0,

@@ -27,7 +27,7 @@ grid_size = 40
 
 # Debugging purposes
 # random.seed(4)
-max_rooms = 50
+max_rooms = 100
 
 # Tkinter canvas
 master = Tk()
@@ -191,6 +191,11 @@ def verify_room_placement(world, room, uc_exit):
     return False
 
 
+def write_to_json(world):
+    with open('world.json', 'w') as file:
+        json.dump(world, file, cls=RoomEncoder, indent=4)
+
+
 def main():
     prefab_room_list = get_rooms()
 
@@ -206,6 +211,7 @@ def main():
 
     uc_exits = get_unconnected_exits(world)
     plot_rooms(canvas, world, uc_exits, plot_scale, grid_size)
+    # write_to_json(world)
     draw_grid(canvas, grid_size, plot_scale, 4)
 
     canvas.pack()
